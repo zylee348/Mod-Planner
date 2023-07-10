@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from "react";
+import { db } from "./firebase";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch(
+          "https://api.nusmods.com/v2/2023-2024/moduleInfo.json"
+        );
+        const modules = await response.json();
+    
+        modules.forEach(async (module) => {
+          const { moduleCode, moduleCredit } = module;
+          try {
+            await setDoc(doc(db, "modules", moduleCode), { moduleCredit });
+            console.log(`Module ${moduleCode} stored in Firestore.`);
+          } catch (error) {
+            console.error(`Error storing module ${moduleCode} in Firestore:`, error);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+    fetchData();
+  }, []);
 
   return (
     <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <h1>Main Page</h1>;
     </>
-  )
+  );
 }
 
-export default App
+export default App;
