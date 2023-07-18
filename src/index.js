@@ -1,17 +1,15 @@
-import polka from 'polka';
-import { json } from 'body-parser';
+import express from 'express';
+import pkg from 'body-parser';
 import bcrypt from 'bcrypt';
-import mongoose from 'mongoose';
 import { MongoClient, ServerApiVersion } from 'mongodb';
 
-const app = polka();
+const { json } = pkg;
+const app = express();
 const port = process.env.PORT || 5000;
 
 // Parse incoming requests with JSON payloads
 app.use(json());
 
-
-const { MongoClient, ServerApiVersion } = require('mongodb');
 const uri = "mongodb+srv://Upsize:Upsize1@cluster0.jaqpvdo.mongodb.net/?retryWrites=true&w=majority";
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
