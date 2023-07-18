@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   createStyles,
   Table,
@@ -19,6 +19,8 @@ import {
 } from "@tabler/icons-react";
 import StatsRingCard from "./StatsRingCard";
 import GpaCalculator from "./GpaCalculator";
+import { db } from "../../database/firebase";
+import {collection, doc, getDoc,} from "firebase/firestore";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -53,11 +55,7 @@ const useStyles = createStyles((theme) => ({
 
 function Th({ children, reversed, sorted, onSort }) {
   const { classes } = useStyles();
-  const Icon = sorted
-    ? reversed
-      ? IconChevronUp
-      : IconChevronDown
-    : IconSelector;
+  const Icon = sorted ? (reversed ? IconChevronUp : IconChevronDown) : IconSelector;
   return (
     <th className={classes.th}>
       <UnstyledButton onClick={onSort} className={classes.control}>
@@ -93,67 +91,110 @@ function sortData(data, payload) {
       if (payload.reversed) {
         return b[sortBy].localeCompare(a[sortBy]);
       }
-
       return a[sortBy].localeCompare(b[sortBy]);
     }),
     payload.search
   );
 }
 
-function Home() {
-  const data = [
-    {
-      moduleCode: "CS101",
-      moduleName: "Introduction to Computer Science",
-      MCs: 4,
-    },
-    {
-      moduleCode: "MA202",
-      moduleName: "Calculus",
-      MCs: 5,
-    },
-  ];
+var initialData = [
+  {
+    moduleCode: "CS1010",
+    MCs: 4,
+  },
+  {
+    moduleCode: "MA2001",
+    MCs: 5,
+  },
+];
 
+function Home() {
+  const [moduleData, setModuleData] = useState([...initialData]);
+  const [userInput, setUserInput] = useState("");
+  const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [sortedData, setSortedData] = useState(data);
+  const [sortedData, setSortedData] = useState([...initialData]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+
+  const fetchModule = async () => {
+    try {
+      const docRef = doc(db, 'modules', userInput);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists) {
+        if (typeof docSnap.data() === 'undefined') {
+          console.log("Failed");
+          setError("Invalid module code entered. Please try again");
+        }
+        const module = {
+          moduleCode: docSnap.id,
+          MCs: docSnap.data().moduleCredit,
+        };
+        setModuleData((prevModuleData) => [...prevModuleData, module]);
+        setUserInput("");
+      } else {
+        console.log("Failed");
+        setError("Invalid module code entered. Please try again");
+      }
+    } catch (error) {
+      console.error("Unable to fetch modules from db", error);
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchModule();
+  // }, [userInput]);
+
+  useEffect(() => {
+    setSortedData(sortData(moduleData, { sortBy, reversed: reverseSortDirection, search }));
+  }, [moduleData, sortBy, reverseSortDirection, search]);
+
+  const handleInputChange = (event) => {
+    setUserInput(event.target.value);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setError(null);
+    fetchModule();
+  };
+
+  function ErrorPopup({ errorMessage, onClose }) {
+    return (
+      <div className="error-popup">
+        <p>{errorMessage}</p>
+        <button onClick={onClose}>Dismiss</button>
+      </div>
+    );
+  }
+
+  const dismissError = () => {
+    setError(null);
+  };
 
   const setSorting = (field) => {
     const reversed = field === sortBy ? !reverseSortDirection : false;
     setReverseSortDirection(reversed);
     setSortBy(field);
-    setSortedData(sortData(data, { sortBy: field, reversed, search }));
   };
 
-  const handleSearchChange = (event) => {
-    const { value } = event.currentTarget;
-    setSearch(value);
-    setSortedData(
-      sortData(data, { sortBy, reversed: reverseSortDirection, search: value })
-    );
-  };
+  const { classes } = useStyles();
 
   const rows = sortedData.map((row) => (
     <tr key={row.moduleCode}>
       <td>{row.moduleCode}</td>
-      <td>{row.moduleName}</td>
       <td>{row.MCs}</td>
     </tr>
   ));
 
-  const { classes } = useStyles();
-
   return (
     <ScrollArea>
       <div>
-        <TextInput
-          placeholder="Search by any field"
-          mb="md"
-          icon={<IconSearch size="0.9rem" stroke={1.5} />}
-          value={search}
-          onChange={handleSearchChange}
-        />
+        <form onSubmit={handleSubmit}>
+          <input type="text" value={userInput} onChange={handleInputChange} />
+          <button type="submit">Add module</button>
+        </form>
+        {error && <ErrorPopup errorMessage={error} onClose={dismissError} />}
         <Table
           horizontalSpacing="md"
           verticalSpacing="xs"
@@ -170,13 +211,6 @@ function Home() {
                 Module Code
               </Th>
               <Th
-                sorted={sortBy === "moduleName"}
-                reversed={reverseSortDirection}
-                onSort={() => setSorting("moduleName")}
-              >
-                Module Name
-              </Th>
-              <Th
                 sorted={sortBy === "MCs"}
                 reversed={reverseSortDirection}
                 onSort={() => setSorting("MCs")}
@@ -190,7 +224,7 @@ function Home() {
               rows
             ) : (
               <tr>
-                <td colSpan={Object.keys(data[0]).length}>
+                <td colSpan="2">
                   <Text weight={500} align="center">
                     Nothing found
                   </Text>
@@ -201,7 +235,7 @@ function Home() {
         </Table>
         <div>
           <Text align="center" color="gray" size="xs">
-            Number of modules in record: {rows.length}
+            Number of modules in record: {moduleData.length}
           </Text>
         </div>
       </div>
@@ -217,7 +251,7 @@ function Home() {
           ]}
         />
       </div>
-      <div style={{ marginTop: '20px', textAlign: 'center' }}>
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
         <GpaCalculator />
       </div>
     </ScrollArea>
