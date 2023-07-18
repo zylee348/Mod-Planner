@@ -3,7 +3,6 @@ import { useState } from "react";
 const Login = () => {
   const [studentNumber, setStudentNumber] = useState("");
   const [password, setPassword] = useState("");
-  const history = useHistory();
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -11,7 +10,7 @@ const Login = () => {
     // Validate the student number and password here
     if (studentNumber === "123456" && password === "password") {
       // Redirect to the main page after successful login
-      history.push("/main");
+      history.push("/home");
     } else {
       // Handle login failure (e.g., show error message)
       console.log("Invalid credentials");
@@ -32,7 +31,7 @@ const Login = () => {
         </label>
         <br />
         <label>
-          Password:
+          Password: 
           <input
             type="password"
             value={password}
