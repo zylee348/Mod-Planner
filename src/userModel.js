@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  fullname: {
+  studentNumber: {
     type: String,
     required: true
   },
-  email: {
+  modules: {
     type: String,
     required: true,
     unique: true
