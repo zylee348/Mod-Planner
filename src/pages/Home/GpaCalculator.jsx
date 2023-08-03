@@ -67,6 +67,13 @@ const GpaCalculator = () => {
     setModules(updatedModules);
   };
 
+  const handleAddModule = () => {
+    setModules((prevModules) => [
+      ...prevModules,
+      { credits: 0, grade: "" }, // Add a new module with initial values
+    ]);
+  };
+
   return (
     <div>
       {/* Module input fields */}
@@ -86,6 +93,11 @@ const GpaCalculator = () => {
           />
         </div>
       ))}
+
+      {/* Button to add more modules */}
+      <div style={{ marginTop: '20px' }}>
+        <button onClick={handleAddModule}>Add more modules</button>
+      </div>
 
       {/* GPA calculation button */}
       <div style={{ marginTop: '20px' }}>
