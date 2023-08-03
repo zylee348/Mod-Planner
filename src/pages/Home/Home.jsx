@@ -19,8 +19,9 @@ import {
 } from "@tabler/icons-react";
 import StatsRingCard from "./StatsRingCard";
 import GpaCalculator from "./GpaCalculator";
-import { db } from "../../database/firebase";
+import { db, database } from "../../database/firebase";
 import {collection, doc, getDoc,} from "firebase/firestore";
+import {ref, child, get, set, remove, onValue } from "firebase/database";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -117,21 +118,48 @@ function Home() {
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
 
+  // const fetchModule = async () => {
+  //   try {
+  //     const docRef = doc(db, 'modules', userInput);
+  //     const docSnap = await getDoc(docRef);
+  //     if (docSnap.exists) {
+  //       if (typeof docSnap.data() === 'undefined') {
+  //         console.log("Failed");
+  //         setError("Invalid module code entered. Please try again");
+  //       }
+  //       const module = {
+  //         moduleCode: docSnap.id,
+  //         MCs: docSnap.data().moduleCredit,
+  //       };
+  //       setModuleData((prevModuleData) => [...prevModuleData, module]);
+  //       setUserInput("");
+  //     } else {
+  //       console.log("Failed");
+  //       setError("Invalid module code entered. Please try again");
+  //     }
+  //   } catch (error) {
+  //     console.error("Unable to fetch modules from db", error);
+  //   }
+    
+  // };
   const fetchModule = async () => {
     try {
-      const docRef = doc(db, 'modules', userInput);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists) {
-        if (typeof docSnap.data() === 'undefined') {
+      const moduleRef = ref(database, `${userInput}`);
+      const moduleSnapshot = await get(moduleRef);
+  
+      if (moduleSnapshot.exists()) {
+        const moduleData = moduleSnapshot.val();
+        if (typeof moduleData === 'undefined') {
           console.log("Failed");
           setError("Invalid module code entered. Please try again");
+        } else {
+          const module = {
+            moduleCode: userInput,
+            MCs: moduleData.moduleCredit,
+          };
+          setModuleData((prevModuleData) => [...prevModuleData, module]);
+          setUserInput("");
         }
-        const module = {
-          moduleCode: docSnap.id,
-          MCs: docSnap.data().moduleCredit,
-        };
-        setModuleData((prevModuleData) => [...prevModuleData, module]);
-        setUserInput("");
       } else {
         console.log("Failed");
         setError("Invalid module code entered. Please try again");
@@ -140,6 +168,42 @@ function Home() {
       console.error("Unable to fetch modules from db", error);
     }
   };
+  
+  // // Replacing root of each realtime DB doc with moduleCode
+  // const changeRootKeyName = async (database, oldKeyName) => {
+  //   try {
+  //     // Step 1: Read the data from the old key
+  //     const oldKeyRef = ref(database, oldKeyName);
+  //     const oldKeySnapshot = await get(oldKeyRef);
+  
+  //     if (oldKeySnapshot.exists()) {
+  //       // Step 2: Create a new key and set its value to the data from the old key
+  //       const moduleCodeValue = oldKeySnapshot.child('moduleCode').val();
+  //       const newKeyName = moduleCodeValue;
+  //       const newKeyRef = ref(database, newKeyName);
+  //       await set(newKeyRef, oldKeySnapshot.val());
+  
+  //       // Step 3: Remove the old key
+  //       await remove(oldKeyRef);
+  
+  //       console.log(`Successfully changed the root key name from "${oldKeyName}" to "${newKeyName}"`);
+  //     } else {
+  //       console.log(`Key "${oldKeyName}" does not exist in the database.`);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error changing the root key name:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   const updateRootKeys = async () => {
+  //     for (let i = 0; i < 15260; i++) {
+  //       await changeRootKeyName(database, i);
+  //     }
+  //   };
+  
+  //   updateRootKeys();
+  // }, []);
 
   // useEffect(() => {
   //   fetchModule();
