@@ -35,9 +35,34 @@ async function run() {
 }
 run().catch(console.dir);
 
+app.get('/login', (req, res) => {
+  res.render('./Login/Login'); // Render the login page (login.jsx)
+});
+
+
+// Add the login route and other routes here
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  // Fetch the user from the MongoDB database based on the provided username
+  const user = await db.collection('users').findOne({ username });
+
+  if (!user || user.password !== password) {
+    // Failed login
+    res.send('Invalid credentials. Please try again.');
+  } else {
+    // Successful login
+    res.send('Login successful!');
+  }
+});
+
+app.get('/register', (req, res) => {
+  res.render('register'); // Render the register page (register.jsx)
+});
+
 // Define a route that registers users to the database
 app.post('/register', async (req, res) => {
-  const { studentNumber, modules, password } = req.body;
+  const { studentNumber, password } = req.body;
 
   // Hash the password
   const hashedPassword = await bcrypt.hash(password, 10);

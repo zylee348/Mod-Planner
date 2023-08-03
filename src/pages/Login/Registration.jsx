@@ -14,7 +14,7 @@ const RegistrationPage = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Add your registration logic here, e.g., API call, form validation, etc.
+    // Add registration logic here, e.g., API call, form validation, etc.
     console.log('Student Number:', studentNumber);
     console.log('Password:', password);
   };
