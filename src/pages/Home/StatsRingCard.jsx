@@ -38,16 +38,16 @@ const useStyles = createStyles((theme) => ({
   },
 }));
 
-function StatsRingCard({ title, completed, total, stats }) {
+function StatsRingCard({ title, completed, total, stats, completedModules }) {
   const { classes, theme } = useStyles();
-  const items = stats.map((stat) => (
-    <div key={stat.label}>
-      <Text className={classes.label}>{stat.value}</Text>
-      <Text size="xs" color="dimmed">
-        {stat.label}
-      </Text>
-    </div>
-  ));
+  // const items = stats.map((stat) => (
+  //   <div key={stat.label}>
+  //     <Text className={classes.label}>{stat.value}</Text>
+  //     <Text size="xs" color="dimmed">
+  //       {stat.label}
+  //     </Text>
+  //   </div>
+  // ));
 
   return (
     <Card withBorder p="xl" radius="md" className={classes.card}>
@@ -61,10 +61,10 @@ function StatsRingCard({ title, completed, total, stats }) {
               {completed}
             </Text>
             <Text fz="xs" color="dimmed">
-              Completed
+              Modules Completed
             </Text>
           </div>
-          <Group mt="lg">{items}</Group>
+          {/* <Group mt="lg">{items}</Group> */}
         </div>
 
         <div className={classes.ring}>
