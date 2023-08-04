@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   createStyles,
   Table,
@@ -278,7 +279,9 @@ function Home() {
   
   const LogoutButton = () => {
     return (
-      <button onClick={handleSignOutClick}>Logout</button>
+      <button style={{
+        float: 'right',
+      }} onClick={handleSignOutClick}>Logout</button>
     );
   };
 
@@ -327,6 +330,7 @@ function Home() {
   return (
     <ScrollArea>
       <div>
+      <LogoutButton />
         <form onSubmit={handleSubmit}>
           <input type="text" value={userInput} onChange={handleInputChange} />
           <button type="submit">Add module</button>
@@ -388,7 +392,6 @@ function Home() {
       <div style={{ marginTop: "20px", textAlign: "center" }}>
         <GpaCalculator />
       </div>
-      <LogoutButton />
     </ScrollArea>
   );
 }
