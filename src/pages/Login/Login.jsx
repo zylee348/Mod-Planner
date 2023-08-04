@@ -1,42 +1,30 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router"
+import { useNavigate } from "react-router";
+import { app } from "../../database/firebase";
 import axios from "axios";
 
 const Login = () => {
   const [studentNumber, setStudentNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-  let navigate = useNavigate();
-
-  useEffect(() => {
-      if (isLoggedIn) {
-        navigate('/home')
-      }
-    })
-    
     try {
-      const response = axios.post("/api/auth/login", {
-        studentNumber,
-        password,
-      });
+      // Use Firebase Auth to sign in with email and password
+      await firebase.auth().signInWithEmailAndPassword(studentNumber, password);
 
-      // Assuming the server responds with a success message
-      if (response.data.success) {
-        setIsLoggedIn(true);
-        setAuthState({ username: response.data.username, id: response.data.id, status: true});
-        navigate("/home");
-      } else {
-        // Handle login failure (e.g., show error message)
-        console.log("Invalid credentials");
-      }
+      // If the login is successful, update the state and navigate to "/home"
+      setIsLoggedIn(true);
+      navigate("/home");
     } catch (error) {
+      // Handle login failure (e.g., show error message)
       console.log("Error occurred during login:", error);
     }
   };
+  
 
   // Render the login form if not logged in, or redirect to home if logged in
   if (isLoggedIn) {
