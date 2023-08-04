@@ -20,7 +20,7 @@ import {
 } from "@tabler/icons-react";
 import StatsRingCard from "./StatsRingCard";
 import GpaCalculator from "./GpaCalculator";
-import { db, database } from "../../database/firebase";
+import { db, database, app } from "../../database/firebase";
 // import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
 import { STUDENT_NUMBERREG } from "../Login/Registration"
@@ -103,16 +103,16 @@ function sortData(data, payload) {
   );
 }
 
-var initialData = [
-  {
-    moduleCode: "CS1010",
-    MCs: 4,
-  },
-  {
-    moduleCode: "MA2001",
-    MCs: 5,
-  },
-];
+var initialData = [];
+//   {
+//     moduleCode: "CS1010",
+//     MCs: '4',
+//   },
+//   {
+//     moduleCode: "MA2001",
+//     MCs: '5',
+//   },
+// ];
 
 function Home() {
   const [moduleData, setModuleData] = useState([...initialData]);
@@ -154,6 +154,7 @@ function Home() {
     try {
       const moduleRef = ref(database, `${userInput}`);
       const moduleSnapshot = await get(moduleRef);
+      console.log(moduleSnapshot.val());
   
       if (moduleSnapshot.exists()) {
         const moduleData = moduleSnapshot.val();
@@ -180,14 +181,17 @@ function Home() {
           });
           console.log(docId); // works and prints special ID
 
-          const userRef = ref(database, docId); // use the special ID to find the user
+          const userRef = ref(database, `${docId}`); // use the special ID to find the user
           const userSnap = await get(userRef); // find the userSnapshot
           console.log(userSnap.exists()); 
+
           // If the document already has a "moduleData" field, use it; otherwise, create an empty array
+          const userData = docSnapshot.docs[0].data();
           const moduleDataArray = userData.moduleData || [];   
 
           // Merge the existing "moduleData" array with the new module using arrayUnion
-          const updatedModuleData = arrayUnion(...moduleDataArray, module);
+          const updatedModuleData = arrayUnion(...moduleDataArray, module); 
+          console.log(updatedModuleData);
           await updateDoc(userRef, { moduleData: updatedModuleData });
           console.log("Success");
         }
