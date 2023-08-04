@@ -23,6 +23,10 @@ import GpaCalculator from "./GpaCalculator";
 import { db, database } from "../../database/firebase";
 // import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
+import { STUDENT_NUMBERREG } from "../Login/Registration"
+import { STUDENT_NUMBER }  from "../Login/Login"
+import { collection, query, where, getDocs, doc, updateDoc, arrayUnion } from "firebase/firestore";
+
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -143,6 +147,9 @@ function Home() {
   //   }
     
   // };
+
+  const stud_num = STUDENT_NUMBER === 0 ? STUDENT_NUMBERREG : STUDENT_NUMBER;
+
   const fetchModule = async () => {
     try {
       const moduleRef = ref(database, `${userInput}`);
@@ -159,11 +166,32 @@ function Home() {
             MCs: moduleData.moduleCredit,
           };
           setModuleData((prevModuleData) => [...prevModuleData, module]);
-          for (let i = 0; i < moduleData.length; i++) {
-
-          }
           setUserInput("");
+
+          //add module to a field called moduleData on firebase linked to the current user.
+          
+          console.log(stud_num);
+
+          const q = query(collection(db, "users"), where("studentNumber", "==", stud_num));
+          const docSnapshot = await getDocs(q); 
+          let docId = null;
+          docSnapshot.forEach((doc) => {
+            docId = doc.id;
+          });
+          console.log(docId); // works and prints special ID
+
+          const userRef = ref(database, docId); // use the special ID to find the user
+          const userSnap = await get(userRef); // find the userSnapshot
+          console.log(userSnap.exists()); 
+          // If the document already has a "moduleData" field, use it; otherwise, create an empty array
+          const moduleDataArray = userData.moduleData || [];   
+
+          // Merge the existing "moduleData" array with the new module using arrayUnion
+          const updatedModuleData = arrayUnion(...moduleDataArray, module);
+          await updateDoc(userRef, { moduleData: updatedModuleData });
+          console.log("Success");
         }
+
       } else {
         console.log("Failed");
         setError("Invalid module code entered. Please try again");

@@ -4,6 +4,8 @@ import { app as firebase , db } from "../../database/firebase";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import {addDoc, collection} from "firebase/firestore";
 
+let STUDENT_NUMBERREG = 0;
+
 const RegistrationPage = () => {
   const [studentNumber, setStudentNumber] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,8 @@ const RegistrationPage = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     // Add your registration logic here, e.g., API call, form validation, etc.
-    console.log('Student Number:', studentNumber);
+    STUDENT_NUMBERREG = studentNumber;
+    console.log('Student Number:', STUDENT_NUMBERREG);
     console.log('Password:', password);
     try {
       // Create the user in Firebase Authentication with email and password
@@ -41,8 +44,8 @@ const RegistrationPage = () => {
         password: password,
       });
 
-      // Registration successful, navigate to "/login" or any other page you want
-      navigate('/login');
+      // Registration successful, navigate to "/home" or any other page you want
+      navigate('/home');
     } catch (error) {
       // Handle registration failure (e.g., show error message)
       console.log('Error occurred during registration:', error);
@@ -79,4 +82,5 @@ const RegistrationPage = () => {
   );
 };
 
+export {STUDENT_NUMBERREG};
 export default RegistrationPage;

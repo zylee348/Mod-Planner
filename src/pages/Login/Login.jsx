@@ -4,6 +4,8 @@ import { app as firebase, db} from "../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 
+let STUDENT_NUMBER = 0;
+
 const Login = () => {
   const [studentNumber, setStudentNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -28,6 +30,7 @@ const Login = () => {
       if (userData.password === password) {
         // If the login is successful, update the state and navigate to "/home"
         setIsLoggedIn(true);
+        STUDENT_NUMBER = studentNumber;
         navigate("/home");
       } else {
         console.log("Wrong password entered, please try again!");
@@ -83,6 +86,8 @@ const Login = () => {
   }
 };
 
+
+export {STUDENT_NUMBER};
 export default Login;
 
 // import { useState } from "react";
