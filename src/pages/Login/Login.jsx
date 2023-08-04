@@ -1,42 +1,49 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router"
-import axios from "axios";
+import { useNavigate } from "react-router";
+import { app as firebase, db} from "../../database/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 
 const Login = () => {
   const [studentNumber, setStudentNumber] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-  let navigate = useNavigate();
-
-  useEffect(() => {
-      if (isLoggedIn) {
-        navigate('/home')
-      }
-    })
-    
     try {
-      const response = axios.post("/api/auth/login", {
-        studentNumber,
-        password,
-      });
+      // Cross checking with firestore
+      const q = query(collection(db,"users"), where("studentNumber", "==", studentNumber));
+      const querySnapshot = await getDocs(q);
 
-      // Assuming the server responds with a success message
-      if (response.data.success) {
+      if (querySnapshot.empty)  {
+        console.log("User not registered!");
+        return;
+      }
+
+      const userData = querySnapshot.docs[0].data();
+
+      if (userData.password === password) {
+        // If the login is successful, update the state and navigate to "/home"
         setIsLoggedIn(true);
-        setAuthState({ username: response.data.username, id: response.data.id, status: true});
         navigate("/home");
       } else {
-        // Handle login failure (e.g., show error message)
-        console.log("Invalid credentials");
+        console.log("Wrong password entered, please try again!");
       }
+
     } catch (error) {
+      // Handle login failure (e.g., show error message)
       console.log("Error occurred during login:", error);
     }
   };
+
+  const handleSignUpClick = () => {
+    // Navigate to the registration page when the "Sign Up" button is clicked
+    navigate("/registration");
+  };
+  
 
   // Render the login form if not logged in, or redirect to home if logged in
   if (isLoggedIn) {
@@ -67,8 +74,10 @@ const Login = () => {
           <button type="submit" className="btn btn-primary">Login</button>
         </form>
         <p className="regs">
-            <button type="submit">Don't have an account? Sign Up</button>
-          </p>
+        <button type="button" onClick={handleSignUpClick}>
+          Don't have an account? Sign Up
+        </button>
+      </p>
       </div>
     );
   }
