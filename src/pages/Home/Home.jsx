@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   createStyles,
   Table,
@@ -242,6 +243,18 @@ function Home() {
     );
   }
 
+  const navigate = useNavigate();
+  const handleSignOutClick = () => {
+    // Navigate to the login page when the "logout" button is clicked
+    navigate("/");
+  };
+  
+  const LogoutButton = () => {
+    return (
+      <button onClick={handleSignOutClick}>Logout</button>
+    );
+  };
+
   const dismissError = () => {
     setError(null);
   };
@@ -325,6 +338,7 @@ function Home() {
       <div style={{ marginTop: "20px", textAlign: "center" }}>
         <GpaCalculator />
       </div>
+      <LogoutButton />
     </ScrollArea>
   );
 }
