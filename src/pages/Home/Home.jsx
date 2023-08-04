@@ -19,9 +19,11 @@ import {
 } from "@tabler/icons-react";
 import StatsRingCard from "./StatsRingCard";
 import GpaCalculator from "./GpaCalculator";
-import { db, database } from "../../database/firebase";
+import { db, database, app as firebase } from "../../database/firebase";
 // import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
+import {collection, getDocs, setDoc, doc } from "firebase/firestore";
+import {getAuth, onAuthStateChanged } from "firebase/auth";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -117,31 +119,74 @@ function Home() {
   const [sortedData, setSortedData] = useState([...initialData]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // const fetchModule = async () => {
-  //   try {
-  //     const docRef = doc(db, 'modules', userInput);
-  //     const docSnap = await getDoc(docRef);
-  //     if (docSnap.exists) {
-  //       if (typeof docSnap.data() === 'undefined') {
-  //         console.log("Failed");
-  //         setError("Invalid module code entered. Please try again");
-  //       }
-  //       const module = {
-  //         moduleCode: docSnap.id,
-  //         MCs: docSnap.data().moduleCredit,
-  //       };
-  //       setModuleData((prevModuleData) => [...prevModuleData, module]);
-  //       setUserInput("");
-  //     } else {
-  //       console.log("Failed");
-  //       setError("Invalid module code entered. Please try again");
-  //     }
-  //   } catch (error) {
-  //     console.error("Unable to fetch modules from db", error);
-  //   }
-    
-  // };
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const user = await getCurrentUser();
+        setCurrentUser(user);
+      } catch (error) {
+        console.error("Error fetching current user:", error);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
+  
+  // Fetch stored moduleData from Firestore when the user is logged in
+  useEffect(() => {
+    const fetchStoredModuleData = async () => {
+      try {
+        const auth = getAuth();
+        onAuthStateChanged(auth, async (user) => {
+          if (user) {
+            const userId = user.uid;
+            const querySnapshot = await getDocs(
+              collection(db, "users", userId, "moduleData")
+            );
+            const userModuleData = querySnapshot.docs.map((doc) => doc.data());
+            setModuleData(userModuleData);
+          }
+        });
+      } catch (error) {
+        console.error("Error fetching user's module data:", error);
+      }
+    };
+
+    fetchStoredModuleData();
+  }, []);
+
+  useEffect(() => {
+    const storeModuleDataInFirestore = async () => {
+      if (currentUser) {
+        const userId = currentUser.uid;
+        console.log(userId);
+        const userDocRef = doc(db, "users", userId);
+
+        try {
+          await setDoc(userDocRef, { moduleData }, { merge: true });
+          console.log("Successfully stored moduleData in Firestore");
+        } catch (error) {
+          console.error("Error storing moduleData in Firestore:", error);
+        }
+      }
+    };
+
+    storeModuleDataInFirestore();
+  }, [currentUser, moduleData]);
+
+  const getCurrentUser = () => {
+    const auth = getAuth();
+    return new Promise((resolve, reject) => {
+      onAuthStateChanged(auth, (user) => {
+        resolve(user);
+      }, (error) => {
+        reject(error);
+      });
+    });
+  };
+
   const fetchModule = async () => {
     try {
       const moduleRef = ref(database, `${userInput}`);
@@ -158,9 +203,15 @@ function Home() {
             MCs: moduleData.moduleCredit,
           };
           setModuleData((prevModuleData) => [...prevModuleData, module]);
-          for (let i = 0; i < moduleData.length; i++) {
-
-          }
+          // Store the updated moduleData in Firestore
+          // if (currentUser) {
+          //   const userId = currentUser.uid;
+          //   const userDocRef = doc(db, "users", userId);
+          //   await setDoc(userDocRef, (prevDoc) => {
+          //     const updatedModuleData = prevDoc.get("moduleData") || [];
+          //     return { moduleData: [...updatedModuleData, module] };
+          //   }, { merge: true });
+          // }
           setUserInput("");
         }
       } else {
