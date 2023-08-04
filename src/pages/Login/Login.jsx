@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { app } from "../../database/firebase";
-import axios from "axios";
+import { app as firebase, db} from "../../database/firebase";
+import { collection, query, where, getDocs } from "firebase/firestore";
+
 
 const Login = () => {
   const [studentNumber, setStudentNumber] = useState("");
@@ -13,16 +14,34 @@ const Login = () => {
     event.preventDefault();
 
     try {
-      // Use Firebase Auth to sign in with email and password
-      await firebase.auth().signInWithEmailAndPassword(studentNumber, password);
+      // Cross checking with firestore
+      const q = query(collection(db,"users"), where("studentNumber", "==", studentNumber));
+      const querySnapshot = await getDocs(q);
 
-      // If the login is successful, update the state and navigate to "/home"
-      setIsLoggedIn(true);
-      navigate("/home");
+      if (querySnapshot.empty)  {
+        console.log("User not registered!");
+        return;
+      }
+
+      const userData = querySnapshot.docs[0].data();
+
+      if (userData.password === password) {
+        // If the login is successful, update the state and navigate to "/home"
+        setIsLoggedIn(true);
+        navigate("/home");
+      } else {
+        console.log("Wrong password entered, please try again!");
+      }
+
     } catch (error) {
       // Handle login failure (e.g., show error message)
       console.log("Error occurred during login:", error);
     }
+  };
+
+  const handleSignUpClick = () => {
+    // Navigate to the registration page when the "Sign Up" button is clicked
+    navigate("/registration");
   };
   
 
@@ -55,8 +74,10 @@ const Login = () => {
           <button type="submit" className="btn btn-primary">Login</button>
         </form>
         <p className="regs">
-            <button type="submit">Don't have an account? Sign Up</button>
-          </p>
+        <button type="button" onClick={handleSignUpClick}>
+          Don't have an account? Sign Up
+        </button>
+      </p>
       </div>
     );
   }
