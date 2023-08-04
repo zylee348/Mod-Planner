@@ -39,6 +39,14 @@ const RegistrationPage = () => {
       {
         studentNumber: studentNumber,
         password: password,
+        moduleData: [{
+          moduleCode: "CS1010",
+          MCs: 4,
+        },
+        {
+          moduleCode: "MA2001",
+          MCs: 5,
+        },],
       });
 
       // Registration successful, navigate to "/login" or any other page you want
