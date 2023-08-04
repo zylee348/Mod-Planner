@@ -20,7 +20,7 @@ import {
 import StatsRingCard from "./StatsRingCard";
 import GpaCalculator from "./GpaCalculator";
 import { db, database } from "../../database/firebase";
-import {collection, doc, getDoc,} from "firebase/firestore";
+// import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
 
 const useStyles = createStyles((theme) => ({
@@ -158,6 +158,9 @@ function Home() {
             MCs: moduleData.moduleCredit,
           };
           setModuleData((prevModuleData) => [...prevModuleData, module]);
+          for (let i = 0; i < moduleData.length; i++) {
+
+          }
           setUserInput("");
         }
       } else {
@@ -168,6 +171,13 @@ function Home() {
       console.error("Unable to fetch modules from db", error);
     }
   };
+
+  const calculateTotalMCs = (data) => {
+    // Calculate the total MCs from all modules in 'data' array
+    return data.reduce((total, module) => total + module.MCs, 0);
+  };
+
+  const totalMCs = calculateTotalMCs(moduleData);
   
   // // Replacing root of each realtime DB doc with moduleCode
   // const changeRootKeyName = async (database, oldKeyName) => {
@@ -303,18 +313,15 @@ function Home() {
           </Text>
         </div>
       </div>
+
       <div>
         <StatsRingCard
           title="Your statistics"
-          completed={80}
+          completed={moduleData.length}
           total={160}
-          stats={[
-            { value: 30, label: "Sem 1" },
-            { value: 30, label: "Sem 2" },
-            { value: 20, label: "Sem 3" },
-          ]}
         />
       </div>
+
       <div style={{ marginTop: "20px", textAlign: "center" }}>
         <GpaCalculator />
       </div>
