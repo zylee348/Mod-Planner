@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import {
   createStyles,
   Table,
@@ -270,6 +271,20 @@ function Home() {
   //   fetchModule();
   // }, [userInput]);
 
+  const navigate = useNavigate();
+  const handleSignOutClick = () => {
+    // Navigate to the login page when the "logout" button is clicked
+    navigate("/");
+  };
+  
+  const LogoutButton = () => {
+    return (
+      <button style={{
+        float: 'right',
+      }} onClick={handleSignOutClick}>Logout</button>
+    );
+  };
+
   useEffect(() => {
     setSortedData(sortData(moduleData, { sortBy, reversed: reverseSortDirection, search }));
   }, [moduleData, sortBy, reverseSortDirection, search]);
@@ -315,6 +330,7 @@ function Home() {
   return (
     <ScrollArea>
       <div>
+      <LogoutButton />
         <form onSubmit={handleSubmit}>
           <input type="text" value={userInput} onChange={handleInputChange} />
           <button type="submit">Add module</button>
