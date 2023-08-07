@@ -212,24 +212,21 @@ function Home() {
               const userCollectionRef = collection(db, "users");
             
               // Get the specific document reference that matches the query
-              const querySnapshot = await getDocs(query(userCollectionRef), where("uid", "==", userId));
+              const querySnapshot = await getDocs(query(userCollectionRef, where("uid", "==", userId)));
               const userDocRef = querySnapshot.docs[0].ref;
             
               // Update the moduleData array field
               const userModuleData = querySnapshot.docs[0].data().moduleData || [];
-              if (userModuleData.includes(userInput)) {
-                userModuleData.push(module);
-                console.log(userModuleData);
-                await updateDoc(userDocRef, { moduleData: userModuleData });
-                console.log("Added to Firebase");
-              } else {
-                setError("Module already in your list of modules! Please add another module instead");
-              }
+              // console.log(userModuleData);
+              userModuleData.push(module);  
+              console.log(userModuleData);
+              await updateDoc(userDocRef, { moduleData: userModuleData });
+              console.log("Added to Firebase");
             } else {
               console.log("No user found");
             }
-            setUserInput("");
           }
+          setUserInput("");
         }
       } else {
         console.log("Failed");
