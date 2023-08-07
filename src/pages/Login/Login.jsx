@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { app as firebase, db} from "../../database/firebase";
+import { app as firebase, db } from "../../database/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
+import { signInWithEmailAndPassword, getAuth } from "firebase/auth";
 
 
 const Login = () => {
@@ -9,6 +10,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
+  const auth = getAuth();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -28,6 +30,7 @@ const Login = () => {
       if (userData.password === password) {
         // If the login is successful, update the state and navigate to "/home"
         setIsLoggedIn(true);
+        signInWithEmailAndPassword(auth, studentNumber + 'gmail.com', password);
         navigate("/home");
       } else {
         console.log("Wrong password entered, please try again!");

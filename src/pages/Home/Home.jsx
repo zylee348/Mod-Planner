@@ -23,7 +23,7 @@ import GpaCalculator from "./GpaCalculator";
 import { db, database, app as firebase } from "../../database/firebase";
 // import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
-import {collection, getDocs, setDoc, doc } from "firebase/firestore";
+import {collection, getDocs, setDoc, doc, query, where, getDoc, updateDoc } from "firebase/firestore";
 import {getAuth, onAuthStateChanged } from "firebase/auth";
 
 const useStyles = createStyles((theme) => ({
@@ -77,9 +77,9 @@ function Th({ children, reversed, sorted, onSort }) {
 }
 
 function filterData(data, search) {
-  const query = search.toLowerCase().trim();
+  const queryData = search.toLowerCase().trim();
   return data.filter((item) =>
-    keys(data[0]).some((key) => item[key].toLowerCase().includes(query))
+    keys(data[0]).some((key) => item[key].toLowerCase().includes(queryData))
   );
 }
 
@@ -102,14 +102,14 @@ function sortData(data, payload) {
 }
 
 var initialData = [
-  {
-    moduleCode: "CS1010",
-    MCs: 4,
-  },
-  {
-    moduleCode: "MA2001",
-    MCs: 5,
-  },
+  // {
+  //   moduleCode: "CS1010",
+  //   MCs: 4,
+  // },
+  // {
+  //   moduleCode: "MA2001",
+  //   MCs: 5,
+  // },
 ];
 
 function Home() {
@@ -120,33 +120,36 @@ function Home() {
   const [sortedData, setSortedData] = useState([...initialData]);
   const [sortBy, setSortBy] = useState(null);
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
-  const [currentUser, setCurrentUser] = useState(null);
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
 
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        const user = await getCurrentUser();
-        setCurrentUser(user);
-      } catch (error) {
-        console.error("Error fetching current user:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchCurrentUser = () => {
+  //     try {
+  //       const user = getCurrentUser();
+  //       setCurrentUser(user);
+  //       // console.log(currentUser.uid);
+  //     } catch (error) {
+  //       console.error("Error fetching current user:", error);
+  //     }
+  //   };
 
-    fetchCurrentUser();
-  }, []);
+  //   fetchCurrentUser();
+  // }, []);
   
   // Fetch stored moduleData from Firestore when the user is logged in
   useEffect(() => {
     const fetchStoredModuleData = async () => {
       try {
-        const auth = getAuth();
+        // const auth = getAuth(firebase);
         onAuthStateChanged(auth, async (user) => {
           if (user) {
             const userId = user.uid;
             const querySnapshot = await getDocs(
-              collection(db, "users", userId, "moduleData")
+              query(collection(db, "users"), where("uid", "==", userId))
             );
-            const userModuleData = querySnapshot.docs.map((doc) => doc.data());
+            const userModuleData = querySnapshot.docs[0].data().moduleData || [];
+            // console.log(userModuleData);
             setModuleData(userModuleData);
           }
         });
@@ -158,34 +161,28 @@ function Home() {
     fetchStoredModuleData();
   }, []);
 
-  useEffect(() => {
-    const storeModuleDataInFirestore = async () => {
-      if (currentUser) {
-        const userId = currentUser.uid;
-        console.log(userId);
-        const userDocRef = doc(db, "users", userId);
+  // useEffect(() => {
+  //   const storeModuleDataInFirestore = async () => {
+  //     if (currentUser) {
+  //       const userId = currentUser.uid;
+  //       console.log(userId);
+  //       const userDocRef = doc(db, "users", where("uid", "==", userId));
 
-        try {
-          await setDoc(userDocRef, { moduleData }, { merge: true });
-          console.log("Successfully stored moduleData in Firestore");
-        } catch (error) {
-          console.error("Error storing moduleData in Firestore:", error);
-        }
-      }
-    };
+  //       try {
+  //         await setDoc(userDocRef, { moduleData }, { merge: true });
+  //         console.log("Successfully stored moduleData in Firestore");
+  //       } catch (error) {
+  //         console.error("Error storing moduleData in Firestore:", error);
+  //       }
+  //     }
+  //   };
 
-    storeModuleDataInFirestore();
-  }, [currentUser, moduleData]);
+  //   storeModuleDataInFirestore();
+  // }, [currentUser, moduleData]);
 
   const getCurrentUser = () => {
     const auth = getAuth();
-    return new Promise((resolve, reject) => {
-      onAuthStateChanged(auth, (user) => {
-        resolve(user);
-      }, (error) => {
-        reject(error);
-      });
-    });
+    return auth.currentUser;
   };
 
   const fetchModule = async () => {
@@ -205,14 +202,24 @@ function Home() {
           };
           setModuleData((prevModuleData) => [...prevModuleData, module]);
           // Store the updated moduleData in Firestore
-          // if (currentUser) {
-          //   const userId = currentUser.uid;
-          //   const userDocRef = doc(db, "users", userId);
-          //   await setDoc(userDocRef, (prevDoc) => {
-          //     const updatedModuleData = prevDoc.get("moduleData") || [];
-          //     return { moduleData: [...updatedModuleData, module] };
-          //   }, { merge: true });
-          // }
+          if (currentUser) {
+            console.log(currentUser.uid);
+            const userId = currentUser.uid;
+            const userCollectionRef = collection(db, "users");
+          
+            // Get the specific document reference that matches the query
+            const querySnapshot = await getDocs(query(userCollectionRef), where("uid", "==", userId));
+            const userDocRef = querySnapshot.docs[0].ref;
+          
+            // Update the moduleData array field
+            const userModuleData = querySnapshot.docs[0].data().moduleData || [];
+            userModuleData.push(module);
+            console.log(userModuleData);
+            await updateDoc(userDocRef, { moduleData: userModuleData });
+            console.log("Added to Firebase");
+          } else {
+            console.log("No user found");
+          }
           setUserInput("");
         }
       } else {
