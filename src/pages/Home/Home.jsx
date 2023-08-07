@@ -24,7 +24,7 @@ import { db, database, app as firebase } from "../../database/firebase";
 // import {collection, doc, getDoc,} from "firebase/firestore";
 import {ref, child, get, set, remove, onValue } from "firebase/database";
 import {collection, getDocs, setDoc, doc, query, where, getDoc, updateDoc } from "firebase/firestore";
-import {getAuth, onAuthStateChanged } from "firebase/auth";
+import {getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 
 const useStyles = createStyles((theme) => ({
   th: {
@@ -290,6 +290,7 @@ function Home() {
   const navigate = useNavigate();
   const handleSignOutClick = () => {
     // Navigate to the login page when the "logout" button is clicked
+    signOut(auth);
     navigate("/");
   };
   
