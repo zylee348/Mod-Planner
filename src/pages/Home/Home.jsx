@@ -191,36 +191,45 @@ function Home() {
       const moduleSnapshot = await get(moduleRef);
   
       if (moduleSnapshot.exists()) {
-        const moduleData = moduleSnapshot.val();
-        if (typeof moduleData === 'undefined') {
-          console.log("Failed");
+        const moduleInfo = moduleSnapshot.val();
+        if (typeof moduleInfo === 'undefined') {
+          console.log("Failed"); 
           setError("Invalid module code entered. Please try again");
         } else {
           const module = {
             moduleCode: userInput,
-            MCs: moduleData.moduleCredit,
+            MCs: moduleInfo.moduleCredit,
           };
-          setModuleData((prevModuleData) => [...prevModuleData, module]);
-          // Store the updated moduleData in Firestore
-          if (currentUser) {
-            console.log(currentUser.uid);
-            const userId = currentUser.uid;
-            const userCollectionRef = collection(db, "users");
-          
-            // Get the specific document reference that matches the query
-            const querySnapshot = await getDocs(query(userCollectionRef), where("uid", "==", userId));
-            const userDocRef = querySnapshot.docs[0].ref;
-          
-            // Update the moduleData array field
-            const userModuleData = querySnapshot.docs[0].data().moduleData || [];
-            userModuleData.push(module);
-            console.log(userModuleData);
-            await updateDoc(userDocRef, { moduleData: userModuleData });
-            console.log("Added to Firebase");
+          console.log(moduleData);
+          if (moduleData.map((element) => element.moduleCode).includes(userInput)) {
+            setError("Module already in your list of modules! Please add another module instead");
           } else {
-            console.log("No user found");
+            setModuleData((prevModuleData) => [...prevModuleData, module]);
+          // Store the updated moduleData in Firestore
+            if (currentUser) {
+              console.log(currentUser.uid);
+              const userId = currentUser.uid;
+              const userCollectionRef = collection(db, "users");
+            
+              // Get the specific document reference that matches the query
+              const querySnapshot = await getDocs(query(userCollectionRef), where("uid", "==", userId));
+              const userDocRef = querySnapshot.docs[0].ref;
+            
+              // Update the moduleData array field
+              const userModuleData = querySnapshot.docs[0].data().moduleData || [];
+              if (userModuleData.includes(userInput)) {
+                userModuleData.push(module);
+                console.log(userModuleData);
+                await updateDoc(userDocRef, { moduleData: userModuleData });
+                console.log("Added to Firebase");
+              } else {
+                setError("Module already in your list of modules! Please add another module instead");
+              }
+            } else {
+              console.log("No user found");
+            }
+            setUserInput("");
           }
-          setUserInput("");
         }
       } else {
         console.log("Failed");
