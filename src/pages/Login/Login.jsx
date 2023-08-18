@@ -29,8 +29,8 @@ const Login = () => {
 
       if (userData.password === password) {
         // If the login is successful, update the state and navigate to "/home"
+        await signInWithEmailAndPassword(auth, studentNumber + '@gmail.com', password);
         setIsLoggedIn(true);
-        signInWithEmailAndPassword(auth, studentNumber + 'gmail.com', password);
         navigate("/home");
       } else {
         console.log("Wrong password entered, please try again!");

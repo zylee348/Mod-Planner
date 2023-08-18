@@ -44,11 +44,11 @@ const RegistrationPage = () => {
         uid: user.uid,
         moduleData: [{
           moduleCode: "CS1010",
-          MCs: 4,
+          MCs: "4",
         },
         {
           moduleCode: "MA2001",
-          MCs: 5,
+          MCs: "4",
         },],
       });
         })
