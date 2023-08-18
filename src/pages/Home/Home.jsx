@@ -122,6 +122,8 @@ function Home() {
   const [reverseSortDirection, setReverseSortDirection] = useState(false);
   const auth = getAuth();
   const currentUser = auth.currentUser;
+  const totalCredits = moduleData.reduce((total, module) => total + parseInt(module.MCs), 0);
+
 
   // useEffect(() => {
   //   const fetchCurrentUser = () => {
@@ -399,7 +401,7 @@ function Home() {
       <div>
         <StatsRingCard
           title="Your statistics"
-          completed={moduleData.length}
+          completed={totalCredits}
           total={160}
         />
       </div>

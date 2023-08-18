@@ -61,7 +61,7 @@ function StatsRingCard({ title, completed, total, stats, completedModules }) {
               {completed}
             </Text>
             <Text fz="xs" color="dimmed">
-              Modules Completed
+              Module Credits Completed
             </Text>
           </div>
           {/* <Group mt="lg">{items}</Group> */}
