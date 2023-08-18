@@ -145,6 +145,7 @@ function Home() {
         onAuthStateChanged(auth, async (user) => {
           if (user) {
             const userId = user.uid;
+            console.log(userId)
             const querySnapshot = await getDocs(
               query(collection(db, "users"), where("uid", "==", userId))
             );
