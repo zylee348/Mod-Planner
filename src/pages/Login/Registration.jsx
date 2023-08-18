@@ -83,29 +83,39 @@ const RegistrationPage = () => {
 
   return (
     <div>
-      <h1>Registration</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="studentNumber">Student Number:</label>
+      <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Registration</h1>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="studentNumber">
+            Student Number:
+          </label>
+          <br />
           <input
             type="text"
             id="studentNumber"
             value={studentNumber}
             onChange={handleStudentNumberChange}
             required
+            style={{ width: '300px', padding: '5px' }}
           />
         </div>
-        <div>
-          <label htmlFor="password">Password:</label>
+        <div style={{ marginBottom: '10px' }}>
+          <label htmlFor="password">
+            Password:
+          </label>
+          <br />
           <input
             type="password"
             id="password"
             value={password}
             onChange={handlePasswordChange}
             required
+            style={{ width: '300px', padding: '5px' }}
           />
         </div>
-        <button type="submit">Register</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '10px' }}>
+          <button type="submit" style={{ width: '150px' }}>Register</button>
+        </div>
       </form>
       {error && <ErrorPopup errorMessage={error} onClose={dismissError} />}
     </div>

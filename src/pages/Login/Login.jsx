@@ -54,33 +54,35 @@ const Login = () => {
   } else {
     return (
       <div className="login-container">
-        <h1>Login</h1>
-        <form onSubmit={handleSubmit}>
-          <label>
+        <h1 style={{ fontSize: '24px', marginBottom: '20px' }}>Login</h1>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+          <label style={{ marginBottom: '5px' }}>
             Student Number:
-            <input
-              type="text"
-              value={studentNumber}
-              onChange={(event) => setStudentNumber(event.target.value)}
-            />
           </label>
-          <br />
-          <label>
+          <input
+            type="text"
+            value={studentNumber}
+            onChange={(event) => setStudentNumber(event.target.value)}
+            style={{ marginBottom: '10px', padding: '5px', width: '300px' }} // Adjust width as needed
+          />
+          <label style={{ marginBottom: '5px' }}>
             Password:
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-            />
           </label>
-          <br />
-          <button type="submit" className="btn btn-primary">Login</button>
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            style={{ marginBottom: '10px', padding: '5px', width: '300px' }} // Adjust width as needed
+          />
+          <button type="submit" className="btn btn-primary" style={{ width: '300px' }}>
+            Login
+          </button>
         </form>
-        <p className="regs">
-        <button type="button" onClick={handleSignUpClick}>
-          Don't have an account? Sign Up
-        </button>
-      </p>
+        <p className="regs" style={{ marginTop: '10px' }}>
+          <button type="button" onClick={handleSignUpClick}>
+            Don't have an account? Sign Up
+          </button>
+        </p>
       </div>
     );
   }
