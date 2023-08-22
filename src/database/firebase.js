@@ -5,7 +5,7 @@ import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBuF0hBXPPkIMvOWKHlHX8X-5Co2PshBI8",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "upsize-76241.firebaseapp.com",
   projectId: "upsize-76241",
   storageBucket: "upsize-76241.appspot.com",
